@@ -157,9 +157,26 @@ const BillChop = (props) => {
 
   const columns = [
     {
-      title: 'Item Name',
-      dataIndex: 'name',
-      key: 'name',
+      title: 'Item',
+      dataIndex: 'item',
+      key: 'item',
+      render: (text, record) => (
+        <div>
+          <div>{record.item}</div>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '5px', flexWrap: 'wrap' }}>
+            {record.claimedBy?.map((claim) => (
+              <div key={claim.claimedByUid} style={{ textAlign: 'center' }}>
+                <img
+                  src={claim.claimedByProfileImage}
+                  alt={claim.name}
+                  style={{ width: '30px', height: '30px', borderRadius: '50%' }}
+                />
+                <div style={{ fontSize: '12px' }}>{claim.claimedQuantity}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
     },
     {
       title: 'Price',
@@ -176,18 +193,19 @@ const BillChop = (props) => {
       title: 'Action',
       key: 'action',
       render: (text, record) => (
-        <Button onClick={() => openEditModal(record)}>Edit</Button> 
+        <Button onClick={() => openEditModal(record)}>Claim</Button>
       ),
     },
   ];
-
+  
 
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Table dataSource={bill?.billfields || []} columns={columns} rowKey="id" />
+    <div style={{ padding: '20px', fontSize: '16px', overflowY: 'auto', maxHeight: '80vh' }}>
+      <h2 style={{ fontSize: '20px' }}>Total Amount: {currencySymbol}{totalBillAmount}</h2>
+      <Table dataSource={bill?.billfields || []} columns={columns} rowKey="id" pagination={false} />
+
       <Modal
-        title="Edit Item"
         visible={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={[
@@ -203,19 +221,25 @@ const BillChop = (props) => {
         ]}
       >
         <Form layout="vertical">
-          <Form.Item label="Item Name">
-            <span>{selectedItem?.name}</span>
+          <Form.Item>
+            <span>Item: {selectedItem?.item}</span>
+            <br></br>
+            <span>Total Item Qty: {selectedItem?.quantity}</span>
           </Form.Item>
           <Form.Item label="Quantity">
-            <Input
-              type="number"
-              value={myItemQty}
-              onChange={(e) => setMyItemQty(parseInt(e.target.value) || 0)}
-            />
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Button onClick={() => setMyItemQty((prevQty) => Math.max(prevQty - 1, 0))}>-</Button>
+              <Input
+                type="number"
+                value={myItemQty}
+                onChange={(e) => setMyItemQty(parseInt(e.target.value) || 0)}
+                style={{ width: '60px', textAlign: 'center', margin: '0 10px' }}
+              />
+              <Button onClick={() => setMyItemQty((prevQty) => prevQty + 1)}>+</Button>
+            </div>
           </Form.Item>
         </Form>
       </Modal>
-      <h2>Total Amount: {currencySymbol}{totalBillAmount}</h2>
     </div>
   );
 };
