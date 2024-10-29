@@ -96,3 +96,107 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+.container {
+  padding: 20px;
+}
+
+.userContainer {
+  margin: 10px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.userRow {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.userImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  margin-right: 10px;
+}
+
+.userInfo {
+  flex: 1;
+}
+
+.userName {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.userTotal {
+  font-size: 14px;
+  color: #777;
+}
+
+.itemsContainer {
+  padding: 10px;
+  background-color: #f2f2f2;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.columnText {
+  flex: 1;
+  text-align: left;
+  font-size: 16px;
+}
+
+.headerText {
+  font-weight: bold;
+  color: #333;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+.itemText {
+  flex: 1;
+  text-align: left;
+  font-size: 14px;
+}
+
+.grandTotalContainer {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.grandTotalText {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.saveButton {
+  background-color: #28a745;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+}
+
+.saveButton:hover {
+  background-color: #218838;
+}

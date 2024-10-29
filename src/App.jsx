@@ -2,68 +2,123 @@ import { useState } from 'react';
 import './App.css';
 import { doc, setDoc, arrayUnion } from 'firebase/firestore';
 import { db } from './firebase';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 function App() {
   const [inputValue, setInputValue] = useState('');
-  const navigate = useNavigate(); // Create the navigate function
+  const [proImage, setProImage] = useState('');
+  const [ext, setExt] = useState('');
+  const [awsProfile, setAwsProfile] = useState('');
+  const navigate = useNavigate();
+
+  const handleProfileImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    setExt(fileExtension);
+
+    if (!['jpg', 'jpeg', 'png'].includes(fileExtension)) {
+      alert('Please upload a valid image file (jpg, jpeg, or png).');
+      return;
+    }
+
+    const tempFilePath = URL.createObjectURL(file);
+    
+    setProImage(tempFilePath);
+  };
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
 
   const handleButtonClick = async () => {
-    if (!inputValue) {
+    if (!inputValue.trim()) {
       alert('Please enter your name');
-      return; // Return early to avoid executing the rest of the function
-    }
-
-    // Get billId from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const billId = urlParams.get('billId');
-    
-    if (!billId) {
-      console.log('No bill ID provided in the URL.');
       return;
     }
-
-    // Create guest id
-    const guestId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    const chops = {
-      friendId: guestId,
-      date: new Date(),
-      name: inputValue,
-      type: 'webView',
-    };
-    
-    const userRefBills = doc(db, 'bills', billId); // Reference to the user's document
-
-    try {
-      await setDoc(userRefBills, {
-        friends: arrayUnion(chops),
-      }, { merge: true }); // The 'merge' option ensures that it won't overwrite existing fields in the document
-    } catch (error) {
-      console.error('Error updating or creating document: ', error);
+  
+    if (!proImage) {
+      alert('No file uploaded. Please add an image.');
+      return;
     }
-
-    const userData = JSON.stringify({ 
-      name: inputValue, 
-      uid: guestId,
-      profileImage: 'https://media.istockphoto.com/id/1332100919/vector/man-icon-black-icon-person-symbol.jpg?s=612x612&w=0&k=20&c=AVVJkvxQQCuBhawHrUhDRTCeNQ3Jgt0K1tXjJsFy1eg=', // Placeholder image
-    
-    }); // Save the user data to localStorage
-   
-    localStorage.setItem('userData', userData);
-    localStorage.setItem('billId', billId);
-    
-    // Redirect to the bill page (assuming you have a route set up for '/bill')
-    navigate(`/pages/billchop`); // Change this path to wherever you want to redirect
+  
+    const response = await fetch(proImage);
+    const blob = await response.blob();
+    const formData = new FormData();
+    formData.append('file', blob, `profileImage.${ext}`);
+  
+    try {
+      const uploadResponse = await fetch('https://baselinesandbox.co.za/jp/cc/profileUpload.php', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      const responseData = await uploadResponse.json();
+      const imageUrl = responseData.mediaUrl;
+      
+      if (imageUrl) {
+        setAwsProfile(imageUrl);
+      } else {
+        throw new Error('Failed to retrieve image URL');
+      }
+  
+      // Proceed only after awsProfile is set
+      const urlParams = new URLSearchParams(window.location.search);
+      const billId = urlParams.get('billId');
+  
+      if (!billId) {
+        console.log('No bill ID provided in the URL.');
+        return;
+      }
+  
+      const guestId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const chops = {
+        friendId: guestId,
+        date: new Date(),
+        name: inputValue,
+        type: 'webView',
+      };
+  
+      try {
+        const userRefBills = doc(db, 'bills', billId);
+        await setDoc(userRefBills, {
+          friends: arrayUnion(chops),
+        }, { merge: true });
+      } catch (error) {
+        console.error('Error updating or creating document:', error);
+      }
+  
+      const userData = JSON.stringify({ 
+        name: inputValue, 
+        uid: guestId,
+        profileImage: imageUrl // Use imageUrl directly
+      });
+  
+      //console.log('userData', userData);
+  
+      localStorage.setItem('userData', userData);
+      localStorage.setItem('billId', billId);
+  
+       navigate('/pages/billchop');
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      alert('Image upload failed. Please try again.');
+    }
   };
+  
 
   return (
     <div className="container">
       <div className="card">
+        <div className="card-title">Add Your Image</div>
+        <input 
+          type="file"
+          accept="image/*"
+          className="card-input-file"
+          onChange={handleProfileImageUpload}
+        />
+        <div className="card-title">Add Your Name</div>
         <input 
           type="text"
           placeholder="Your Name"
@@ -71,7 +126,7 @@ function App() {
           value={inputValue}
           onChange={handleInputChange}
         />
-        <button onClick={handleButtonClick}>Chop Cheque</button>
+        <button className="card-button" onClick={handleButtonClick}>Chop Cheque</button>
       </div>
     </div>
   );
