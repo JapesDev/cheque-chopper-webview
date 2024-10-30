@@ -1,0 +1,10 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Optional, for centering */
+  }
+  .userContainer, .grandTotalContainer, .saveButton {
+    width: 100%; /* Or set a max-width as desired */
+    margin-bottom: 20px; /* Add some spacing between blocks */
+  }
+  
