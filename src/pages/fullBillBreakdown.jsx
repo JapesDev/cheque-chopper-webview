@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
-import '../App.css';
+import '../fullBill.css';
 
 const FullBillBreakdown = (props) => {
   const navigate = useNavigate();
   const [groupedByUser, setGroupedByUser] = useState({});
   const [expandedUsers, setExpandedUsers] = useState({});
   const [tip, setTip] = useState('');
+  const [billTotal, setBillTotal] = useState(0);
   
   const gotBillid = localStorage.getItem('billId'); 
-  const billTotal = 1000;
+
   const tipAmount = (tip === "10%" ? 0.10 : tip === "15%" ? 0.15 : tip === "20%" ? 0.20 : 0);
   const tipTotal = billTotal * tipAmount;
   const [currencySymbol, setCurrencySymbol] = useState('R');
@@ -29,8 +30,13 @@ const FullBillBreakdown = (props) => {
             const currencySymbol = billFields[0]?.currencySymbol || '';
             setCurrencySymbol(currencySymbol);
 
+            /// Bill total
+
+          const billTotal = billFields.reduce((total, field) => total + field.price, 0);
+
             const tip = billData.tip;
             setTip(tip);
+            setBillTotal(billTotal);
             
             const claimedItems = [];
 
